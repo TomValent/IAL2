@@ -46,8 +46,11 @@ void ht_init(ht_table_t *table) {
 ht_item_t *ht_search(ht_table_t *table, char *key) {
   for(int i = 0; i < MAX_HT_SIZE; i++)
   {
-      if((*table)[i]->key == key)
-          return (*table[i]);
+      if((*table)[i] != NULL)
+      {
+          if((*table)[i]->key == key)
+              return (*table[i]);
+      }
   }
   return NULL;
 }
@@ -66,7 +69,7 @@ void ht_insert(ht_table_t *table, char *key, float value) {
         tmp->value = value;
     else
     {
-        struct ht_item *new = (ht_item_t*) malloc(sizeof(ht_item_t));
+        struct ht_item *new = malloc(sizeof(struct ht_item));
         if(!new)
             return;
         new->key = key;
@@ -108,6 +111,21 @@ float *ht_get(ht_table_t *table, char *key) {
  * Pri implementácii NEVYUŽÍVAJTE funkciu ht_search.
  */
 void ht_delete(ht_table_t *table, char *key) {
+    int hash_code = get_hash(key);
+    if((*table)[hash_code] != NULL)
+    {
+        struct ht_item *tmp = *table[hash_code];
+        struct ht_item *next;
+
+        while (tmp->next != NULL)
+        {
+            next = tmp->next;
+            free(tmp);
+            tmp = next;
+        }
+        free(tmp);
+    }
+    (*table)[hash_code] = NULL;
 }
 
 /*
@@ -117,4 +135,20 @@ void ht_delete(ht_table_t *table, char *key) {
  * inicializácii.
  */
 void ht_delete_all(ht_table_t *table) {
+    struct ht_item *tmp, *next;
+    for(int pos = 0; pos < MAX_HT_SIZE; pos++)
+    {
+        if((*table)[pos] != NULL)
+        {
+            next = (*table)[pos];
+            while(next->next != NULL)
+            {
+                tmp = next;
+                next = next->next;
+                free(tmp);
+            }
+            free(next);
+            (*table)[pos] = NULL;
+        }
+    }
 }
