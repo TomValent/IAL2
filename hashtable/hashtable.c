@@ -64,12 +64,12 @@ ht_item_t *ht_search(ht_table_t *table, char *key) {
  * synonym zvoľte najefektívnejšiu možnosť a vložte prvok na začiatok zoznamu.
  */
 void ht_insert(ht_table_t *table, char *key, float value) {
-    struct ht_item *tmp = ht_search(table, key);
+    ht_item_t *tmp = ht_search(table, key);
     if(tmp)
         tmp->value = value;
     else
     {
-        struct ht_item *new = malloc(sizeof(struct ht_item));
+        ht_item_t *new = (ht_item_t*) malloc(sizeof(ht_item_t));
         if(!new)
             return;
         new->key = key;
@@ -95,7 +95,7 @@ void ht_insert(ht_table_t *table, char *key, float value) {
  * Pri implementácii využite funkciu ht_search.
  */
 float *ht_get(ht_table_t *table, char *key) {
-    struct ht_item *tmp = ht_search(table, key);
+    ht_item_t *tmp = ht_search(table, key);
     if(tmp != NULL)
         return &(tmp->value);
 
@@ -114,18 +114,33 @@ void ht_delete(ht_table_t *table, char *key) {
     int hash_code = get_hash(key);
     if((*table)[hash_code] != NULL)
     {
-        struct ht_item *tmp = *table[hash_code];
-        struct ht_item *next;
+        ht_item_t *tmp = (*table)[hash_code];
+        ht_item_t *prev;
 
-        while (tmp->next != NULL)
+        if(tmp->key == key)
         {
-            next = tmp->next;
+            (*table)[hash_code] = tmp->next;
             free(tmp);
-            tmp = next;
         }
-        free(tmp);
+        else
+        {
+            while(tmp->next != NULL)
+            {
+                prev = tmp;
+                tmp = tmp->next;
+                if(tmp->key == key)
+                {
+                    prev->next = tmp->next;
+                    free(tmp);
+                    break;
+                }
+            }
+            if(tmp->key == key)
+            {
+                free(tmp);
+            }
+        }
     }
-    (*table)[hash_code] = NULL;
 }
 
 /*
@@ -135,7 +150,7 @@ void ht_delete(ht_table_t *table, char *key) {
  * inicializácii.
  */
 void ht_delete_all(ht_table_t *table) {
-    struct ht_item *tmp, *next;
+    ht_item_t *tmp, *next;
     for(int pos = 0; pos < MAX_HT_SIZE; pos++)
     {
         if((*table)[pos] != NULL)
