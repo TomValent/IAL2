@@ -21,8 +21,6 @@
  */
 void bst_init(bst_node_t **tree) {
     tree = NULL;
-    stack_bst_t stack;
-    stack_bst_init(&stack);
 }
 
 /*
@@ -35,10 +33,30 @@ void bst_init(bst_node_t **tree) {
  * Funkciu implementujte iteratívne bez použitia vlastných pomocných funkcií.
  */
 bool bst_search(bst_node_t *tree, char key, int *value) {
-    if(tree != NULL)
+    bst_node_t *tmp = tree;
+    while(tmp)
     {
-        if()
+        if(tmp->key == key)     //found
+        {
+            tmp->value = *value;
+            return true;
+        }
+        if(tmp->key < key)      //lavy podstrom
+        {
+            if(tmp->left != NULL)
+                tmp = tmp->left;
+            else
+                return false;
+        }
+        else                    //pravy podstrom
+        {
+            if(tmp->right != NULL)
+                tmp = tmp->right;
+            else
+                return false;
+        }
     }
+    return false;
 }
 
 /*
@@ -53,6 +71,33 @@ bool bst_search(bst_node_t *tree, char key, int *value) {
  * Funkciu implementujte iteratívne bez použitia vlastných pomocných funkcií.
  */
 void bst_insert(bst_node_t **tree, char key, int value) {
+    bst_node_t *tmp = *tree;
+    bst_node_t *new = malloc(sizeof(bst_node_t));
+
+    new->key = key;
+    new->value = value;
+
+    while(tmp)
+    {
+        if(tmp->key == key)     //found == nahradi hodnotu
+        {
+            tmp->value = value;
+        }
+        if(tmp->key < key)      //lavy podstrom
+        {
+            if(tmp->left != NULL)
+                tmp = tmp->left;
+            else
+                tmp->left = new;
+        }
+        else                    //pravy podstrom
+        {
+            if(tmp->right != NULL)
+                tmp = tmp->right;
+            else
+                tmp->right = new;
+        }
+    }
 }
 
 /*
@@ -69,6 +114,14 @@ void bst_insert(bst_node_t **tree, char key, int value) {
  * Funkciu implementujte iteratívne bez použitia vlastných pomocných funkcií.
  */
 void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
+    bst_node_t *tmp = *tree;
+    while(tmp->right)
+    {
+        tmp = tmp->right;
+    }
+    target->value = tmp->value;
+    target->key = tmp->key;
+    free(tmp);
 }
 
 /*
