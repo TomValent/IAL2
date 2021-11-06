@@ -36,7 +36,7 @@ bool bst_search(bst_node_t *tree, char key, int *value) {
     bst_node_t *tmp = tree;
     while(tmp)
     {
-        if(tmp->key == key)     //found
+        if(tmp->key == key)     //found     //prva iteracia tmp == root
         {
             tmp->value = *value;
             return true;
@@ -73,6 +73,8 @@ bool bst_search(bst_node_t *tree, char key, int *value) {
 void bst_insert(bst_node_t **tree, char key, int value) {
     bst_node_t *tmp = *tree;
     bst_node_t *new = malloc(sizeof(bst_node_t));
+    if(!new)
+        return;
 
     new->key = key;
     new->value = value;
@@ -82,20 +84,27 @@ void bst_insert(bst_node_t **tree, char key, int value) {
         if(tmp->key == key)     //found == nahradi hodnotu
         {
             tmp->value = value;
+            break;
         }
         if(tmp->key < key)      //lavy podstrom
         {
             if(tmp->left != NULL)
                 tmp = tmp->left;
             else
+            {
                 tmp->left = new;
+                break;
+            }
         }
         else                    //pravy podstrom
         {
             if(tmp->right != NULL)
                 tmp = tmp->right;
             else
+            {
                 tmp->right = new;
+                break;
+            }
         }
     }
 }
@@ -115,13 +124,29 @@ void bst_insert(bst_node_t **tree, char key, int value) {
  */
 void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
     bst_node_t *tmp = *tree;
+    bst_node_t *prev = target;
     while(tmp->right)
     {
+        prev = tmp;
         tmp = tmp->right;
     }
-    target->value = tmp->value;
-    target->key = tmp->key;
-    free(tmp);
+    if(tmp->left == NULL)
+    {
+        target->value = tmp->value;
+        target->key = tmp->key;
+        free(tmp);
+    }
+    else
+    {
+        target->value = tmp->value;
+        target->key = tmp->key;
+        target->left = tmp->left;
+        target->right = tmp->right;
+
+        prev->right = tmp->left;
+        free(tmp->left);
+    }
+
 }
 
 /*
@@ -137,6 +162,86 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
  * použitia vlastných pomocných funkcií.
  */
 void bst_delete(bst_node_t **tree, char key) {
+    bst_node_t *tmp = *tree;
+    bst_node_t *prev = NULL;
+    while(tmp)
+    {
+        if(tmp->key == key)                     //found
+        {
+            if(!tmp->left && !tmp->right)                                           //no childs
+            {
+                free(tmp);
+                break;
+            }
+            else if((!tmp->left && tmp->right) || (tmp->left && !tmp->right))       //1 child
+            {
+                if(prev != NULL)        //tmp neni root
+                {
+                    if(prev->left == tmp)
+                    {
+                        if(tmp->left != NULL)
+                        {
+                            prev->left = tmp->left;
+                        }
+                        else if(tmp->right != NULL)
+                        {
+                            prev->left = tmp->right;
+                        }
+                    }
+                    else if(prev->right == tmp)
+                    {
+                        if(tmp->left != NULL)
+                        {
+                            prev->right = tmp->left;
+                        }
+                        else if(tmp->right != NULL)
+                        {
+                            prev->right = tmp->right;
+                        }
+                    }
+                    free(tmp);
+                    break;
+                }
+                else                //tmp je root
+                {
+                    if(tmp->left != NULL)
+                    {
+                        *tree = tmp->left;
+                    }
+                    else if(tmp->right != NULL)
+                    {
+                        *tree = tmp->right;
+                    }
+                    free(tmp);
+                    break;
+                }
+            }
+            else if(tmp->left && tmp->right)                                        //both children
+            {
+                bst_replace_by_rightmost(tmp, &(tmp->left));
+            }
+        }
+        if(tmp->key < key)                      //lavy podstrom
+        {
+            if(tmp->left != NULL)
+            {
+                prev = tmp;
+                tmp = tmp->left;
+            }
+            else
+                break;
+        }
+        else                                    //pravy podstrom
+        {
+            if(tmp->right != NULL)
+            {
+                prev = tmp;
+                tmp = tmp->right;
+            }
+            else
+                break;
+        }
+    }
 }
 
 /*
