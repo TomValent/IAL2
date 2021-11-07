@@ -417,7 +417,6 @@ void bst_postorder(bst_node_t *tree) {
         tmp = stack_bst_top(&stack);
         stack_bst_pop(&stack);
         fromLeft = stack_bool_pop(&stackB);
-        //stack_bool_pop(&stackB);
         if(fromLeft)
         {
             stack_bst_push(&stack, tmp);
