@@ -20,7 +20,7 @@
  * možné toto detegovať vo funkcii.
  */
 void bst_init(bst_node_t **tree) {
-    tree = NULL;
+    *tree = NULL;
 }
 
 /*
@@ -34,12 +34,11 @@ void bst_init(bst_node_t **tree) {
  */
 bool bst_search(bst_node_t *tree, char key, int *value) {
     bst_node_t *tmp = tree;
-
     while(tmp)
     {
         if(tmp->key == key)     //found     //prva iteracia tmp == root
         {
-            tmp->value = *value;
+            *value = tmp->value;
             return true;
         }
         if(tmp->key < key)      //lavy podstrom
@@ -108,6 +107,7 @@ void bst_insert(bst_node_t **tree, char key, int value) {
             }
         }
     }
+    *tree = new;
 }
 
 /*
@@ -253,7 +253,7 @@ void bst_delete(bst_node_t **tree, char key) {
  * Funkciu implementujte iteratívne pomocou zásobníku uzlov a bez použitia
  * vlastných pomocných funkcií.
  */
-void bst_dispose(bst_node_t **tree) {/*
+void bst_dispose(bst_node_t **tree) {
     stack_bst_t stack;
     stack_bst_init(&stack);
 
@@ -269,7 +269,7 @@ void bst_dispose(bst_node_t **tree) {/*
 
         free(tmp);
     }
-    *tree= NULL;*/
+    *tree= NULL;
 }
 
 /*
