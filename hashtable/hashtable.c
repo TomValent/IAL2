@@ -135,10 +135,6 @@ void ht_delete(ht_table_t *table, char *key) {
                     break;
                 }
             }
-            if(tmp->key == key)
-            {
-                free(tmp);
-            }
         }
     }
 }
