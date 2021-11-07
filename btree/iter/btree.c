@@ -92,6 +92,7 @@ void bst_insert(bst_node_t **tree, char key, int value) {
         if(tmp->key == key)     //found == nahradi hodnotu
         {
             tmp->value = value;
+            free(new);
             break;
         }
         else if(tmp->key > key)      //lavy podstrom
