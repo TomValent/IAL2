@@ -191,12 +191,12 @@ int main(int argc, char *argv[]) {
   test_tree_update_root();
   test_tree_insert_many();
   test_tree_search();
-  test_tree_delete_both_subtrees_parent();
   test_tree_search_missing();
   test_tree_delete_leaf();
   test_tree_delete_left_subtree();
   test_tree_delete_right_subtree();
   test_tree_delete_both_subtrees();
+  test_tree_delete_both_subtrees_parent();
   test_tree_delete_missing();
   test_tree_delete_root();
   test_tree_dispose_filled();
