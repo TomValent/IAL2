@@ -41,7 +41,7 @@ bool bst_search(bst_node_t *tree, char key, int *value) {
             *value = tmp->value;
             return true;
         }
-        if(tmp->key < key)      //lavy podstrom
+        else if(tmp->key > key)      //lavy podstrom
         {
             if(tmp->left != NULL)
                 tmp = tmp->left;
@@ -78,6 +78,14 @@ void bst_insert(bst_node_t **tree, char key, int value) {
 
     new->key = key;
     new->value = value;
+    new->left = NULL;
+    new->right = NULL;
+
+    if(!tmp)
+    {
+        *tree = new;
+        return;
+    }
 
     while(tmp)
     {
@@ -86,7 +94,7 @@ void bst_insert(bst_node_t **tree, char key, int value) {
             tmp->value = value;
             break;
         }
-        if(tmp->key < key)      //lavy podstrom
+        else if(tmp->key > key)      //lavy podstrom
         {
             if(tmp->left != NULL)
                 tmp = tmp->left;
@@ -107,7 +115,6 @@ void bst_insert(bst_node_t **tree, char key, int value) {
             }
         }
     }
-    *tree = new;
 }
 
 /*
@@ -135,6 +142,7 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
     {
         target->value = tmp->value;
         target->key = tmp->key;
+        prev->right = NULL;
         free(tmp);
     }
     else
@@ -143,7 +151,7 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
         target->key = tmp->key;
 
         prev->right = tmp->left;
-        free(tmp->left);
+        free(tmp);
     }
 
 }
@@ -169,6 +177,11 @@ void bst_delete(bst_node_t **tree, char key) {
         {
             if(!tmp->left && !tmp->right)                                           //no childs
             {
+                if(prev->left == tmp)
+                    prev->left = NULL;
+                if(prev->right == tmp)
+                    prev->right = NULL;
+
                 free(tmp);
                 break;
             }
@@ -220,7 +233,7 @@ void bst_delete(bst_node_t **tree, char key) {
                 bst_replace_by_rightmost(tmp, &(tmp->left));
             }
         }
-        if(tmp->key < key)                      //lavy podstrom
+        if(tmp->key > key)                      //lavy podstrom
         {
             if(tmp->left != NULL)
             {
@@ -269,7 +282,7 @@ void bst_dispose(bst_node_t **tree) {
 
         free(tmp);
     }
-    *tree= NULL;
+    *tree = NULL;
 }
 
 /*
@@ -282,6 +295,7 @@ void bst_dispose(bst_node_t **tree) {
  * vlastných pomocných funkcií.
  */
 void bst_leftmost_preorder(bst_node_t *tree, stack_bst_t *to_visit) {
+
 }
 
 /*
@@ -293,6 +307,14 @@ void bst_leftmost_preorder(bst_node_t *tree, stack_bst_t *to_visit) {
  * zásobníku uzlov bez použitia vlastných pomocných funkcií.
  */
 void bst_preorder(bst_node_t *tree) {
+    stack_bst_t stack;
+    stack_bst_init(&stack);
+    bst_node_t *tmp = *tree;
+
+    while(tmp)
+    {
+
+    }
 }
 
 /*
