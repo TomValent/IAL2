@@ -121,17 +121,15 @@ bst_delete(&test_tree, 'L');
 bst_print_tree(test_tree);
 ENDTEST
 
-TEST(test_tree_delete_both_subtrees_parent,
-     "Delete a node with both subtrees while moving a parent (F, H)")
-    bst_init(&test_tree);
-    bst_insert_many(&test_tree, base_keys, base_values, base_data_count);
-    bst_insert_many(&test_tree, additional_keys, additional_values,
-                    additional_data_count);
+TEST(test_tree_delete_both_subtrees_parent,"Delete a node with both subtrees while moving a parent (F, H)")
+bst_init(&test_tree);
+bst_insert_many(&test_tree, base_keys, base_values, base_data_count);
+bst_insert_many(&test_tree, additional_keys, additional_values, additional_data_count);
 
-    bst_delete(&test_tree, 'G');
-    bst_print_tree(test_tree);
-    bst_delete(&test_tree, 'H');
-    bst_print_tree(test_tree);
+bst_delete(&test_tree, 'G');
+bst_print_tree(test_tree);
+bst_delete(&test_tree, 'H');
+bst_print_tree(test_tree);
 ENDTEST
 
 TEST(test_tree_delete_missing, "Delete a node that doesn't exist (U)")
@@ -193,6 +191,7 @@ int main(int argc, char *argv[]) {
   test_tree_update_root();
   test_tree_insert_many();
   test_tree_search();
+  test_tree_delete_both_subtrees_parent();
   test_tree_search_missing();
   test_tree_delete_leaf();
   test_tree_delete_left_subtree();
