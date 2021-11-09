@@ -143,7 +143,14 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
     {
         target->value = tmp->value;
         target->key = tmp->key;
-        prev->right = NULL;
+        if(target != prev)
+        {
+            prev->right = NULL;
+        }
+        else
+        {
+            prev->left = NULL;      //tmp je len koren zmazem cestu z targetu do tmp
+        }
         free(tmp);
     }
     else
