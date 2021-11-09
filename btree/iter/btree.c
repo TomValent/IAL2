@@ -134,6 +134,8 @@ void bst_insert(bst_node_t **tree, char key, int value) {
 void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
     bst_node_t *tmp = *tree;
     bst_node_t *prev = target;
+    if(!tmp)
+        return;
     while(tmp->right)
     {
         prev = tmp;
