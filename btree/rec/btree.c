@@ -133,27 +133,48 @@ void bst_insert(bst_node_t **tree, char key, int value) {
  */
 void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
     bst_node_t *tmp = *tree;
-    static bst_node_t *prev = target;
+    bst_node_t *prev = target;
 
-    if(tmp->right)
+    if(!tmp)
+        return;
+
+    if(tmp->right->right)
     {
-        prev = tmp;
         bst_replace_by_rightmost(target, &tmp->right);
     }
-    if(!tmp->left)
+    if(tmp->right)      //aspon 1 pravy uzol tam je - aj ak sa nedostane do prvej podmienky
     {
-        target->value = tmp->value;
-        target->key = tmp->key;
-        prev->right = NULL;
-        free(tmp);
-        return;
-    }
-    else
-    {
-        target->value = tmp->value;
-        target->key = tmp->key;
+        if(!tmp->right->left)       //najdeny najpravejsi nema laveho syna
+        {
+            prev = tmp;
+            tmp = tmp->right;
 
-        prev->right = tmp->left;
+            target->value = tmp->value;
+            target->key = tmp->key;
+            prev->right = NULL;
+            free(tmp);
+            return;
+        }
+        else                        //najdeny najpravejsi ma laveho syna
+        {
+            prev = tmp;
+            tmp = tmp->right;
+
+            target->value = tmp->value;
+            target->key = tmp->key;
+
+            prev->right = tmp->left;
+            free(tmp);
+        }
+    }
+    else        //hned nalavo pod targetom je najpravejsi uzol - ak sa nedostane do prvej podmienky vobec
+    {
+        target->value = tmp->value;
+        target->key = tmp->key;
+        if(tmp->left)                      //strom tmp ma lavy podstrom
+            prev->left = tmp->left;
+        else                               //strom tmp ma len 1 prvok
+            prev->left = NULL;
         free(tmp);
     }
 }
@@ -171,6 +192,95 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
  * použitia vlastných pomocných funkcií.
  */
 void bst_delete(bst_node_t **tree, char key) {
+    bst_node_t *tmp = *tree;
+    static bool null = 0;                   //static uchova hodnotu premennej aj po dalsom zavolani (mali ste si dat ijc)
+    static bool kidL = 0;
+    static bool kidR = 0;
+
+    if(!tmp)                                //koren je NULL
+        return;
+
+    if(tmp->key == key)                     //found
+    {
+        if(!tmp->left && !tmp->right)                                           //no kids
+        {
+            free(tmp);
+            null = true;
+            return;
+        }
+        else if((!tmp->left && tmp->right) || (tmp->left && !tmp->right))       //1 child
+        {
+            if(tmp->left)
+            {
+                kidL = true;
+                return;
+            }
+            else//tmp->right
+            {
+                kidR = true;
+                return;
+            }
+        }
+        else if(tmp->left && tmp->right)                                        //2 children
+        {
+            bst_replace_by_rightmost(tmp, &(tmp->left));
+        }
+    }
+    else if(tmp->key > key)                 //lavy podstrom
+    {
+        if(tmp->left != NULL)
+        {
+            bst_delete(&tmp->left, key);
+            if(null == true)
+            {
+                tmp->left = NULL;
+                null = false;
+            }
+            else if(kidL == true)           //tmp->left mame mazat a ma laveho potomka
+            {
+                bst_node_t *delete = tmp->left;
+                tmp->left = tmp->left->left;
+                free(delete);
+                kidL = false;
+            }
+            else if(kidR == true)           //tmp->left mame mazat a ma praveho potomka
+            {
+                bst_node_t *delete = tmp->left;
+                tmp->left = tmp->left->right;
+                free(delete);
+                kidR = false;
+            }
+        }
+        else
+            return;
+    }
+    else if(tmp->key < key)                 //pravy podstrom
+    {
+        if(tmp->right != NULL)
+        {
+            bst_delete(&tmp->right, key);
+            if(null == false)
+            {
+                tmp->right = NULL;
+                null = false;
+            }
+            else if(kidL == true)           //tmp->right mame mazat a ma laveho potomka
+            {
+                bst_node_t *delete = tmp->right;
+                tmp->right = tmp->right->left;
+                free(delete);
+                kidL = false;
+            }
+            else if(kidR == true)           //tmp->right mame mazat a ma praveho potomka
+            {
+                bst_node_t *delete = tmp->right;
+                tmp->right = tmp->right->right;
+                free(delete);
+                kidL = false;
+            }
+        }
+        return;
+    }
 }
 
 /*
@@ -183,6 +293,7 @@ void bst_delete(bst_node_t **tree, char key) {
  * Funkciu implementujte rekurzívne bez použitia vlastných pomocných funkcií.
  */
 void bst_dispose(bst_node_t **tree) {
+
 }
 
 /*
