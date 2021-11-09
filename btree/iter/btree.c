@@ -187,6 +187,11 @@ void bst_delete(bst_node_t **tree, char key) {
         {
             if(!tmp->left && !tmp->right)                                           //no childs
             {
+                if(tmp == *tree)
+                {
+                    free(tmp);
+                    return;
+                }
                 if(prev->left == tmp)
                     prev->left = NULL;
                 if(prev->right == tmp)
