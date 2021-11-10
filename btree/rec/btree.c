@@ -141,25 +141,26 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
     if(tmp->right->right)
     {
         bst_replace_by_rightmost(target, &tmp->right);
+        return;
     }
     if(tmp->right)      //aspon 1 pravy uzol tam je - aj ak sa nedostane do prvej podmienky
     {
-        if(!tmp->right->left)       //najdeny najpravejsi nema laveho syna
+        if(tmp->right->left == NULL)        //najdeny najpravejsi nema laveho syna
         {
             prev = tmp;
             tmp = tmp->right;
 
             target->value = tmp->value;
             target->key = tmp->key;
-            prev->right = NULL;
+
             free(tmp);
+            prev->right = NULL;
             return;
         }
-        else                        //najdeny najpravejsi ma laveho syna
+        else                                //najdeny najpravejsi ma laveho syna
         {
             prev = tmp;
             tmp = tmp->right;
-
             target->value = tmp->value;
             target->key = tmp->key;
 
@@ -171,10 +172,11 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
     {
         target->value = tmp->value;
         target->key = tmp->key;
+
         if(tmp->left)                      //strom tmp ma lavy podstrom
-            prev->left = tmp->left;
+            prev->right = tmp->left;
         else                               //strom tmp ma len 1 prvok
-            prev->left = NULL;
+            prev->right = NULL;
         free(tmp);
     }
 }
@@ -192,94 +194,56 @@ void bst_replace_by_rightmost(bst_node_t *target, bst_node_t **tree) {
  * použitia vlastných pomocných funkcií.
  */
 void bst_delete(bst_node_t **tree, char key) {
-    bst_node_t *tmp = *tree;
-    static bool null = 0;                   //static uchova hodnotu premennej aj po dalsom zavolani (mali ste si dat ijc)
-    static bool kidL = 0;
-    static bool kidR = 0;
-
-    if(!tmp)                                //koren je NULL
+    if(!*tree)                                //koren je NULL
         return;
 
-    if(tmp->key == key)                     //found
+    if((*tree)->key == key)                     //found
     {
-        if(!tmp->left && !tmp->right)                                           //no kids
+        if(!(*tree)->left && !(*tree)->right)                                                   //no kids
         {
-            free(tmp);
-            null = true;
+            free((*tree));
+            *tree = NULL;
+        }
+        else if((!(*tree)->left && (*tree)->right) || ((*tree)->left && !(*tree)->right))       //1 child
+        {
+            if((*tree)->left)           //existuje len lavy podstrom
+            {
+                bst_node_t *to_delete = (*tree);
+                (*tree) = (*tree)->left;
+                free(to_delete);
+            }
+            else//(*tree)->right        //existuje len pravy podstrom
+            {
+                bst_node_t *to_delete = (*tree);
+                (*tree) = (*tree)->right;
+                free(to_delete);
+            }
+        }
+        else if((*tree)->left && (*tree)->right)                                                //2 children
+        {
+            bst_replace_by_rightmost((*tree), &(*tree)->left);
             return;
         }
-        else if((!tmp->left && tmp->right) || (tmp->left && !tmp->right))       //1 child
-        {
-            if(tmp->left)
-            {
-                kidL = true;
-                return;
-            }
-            else//tmp->right
-            {
-                kidR = true;
-                return;
-            }
-        }
-        else if(tmp->left && tmp->right)                                        //2 children
-        {
-            bst_replace_by_rightmost(tmp, &(tmp->left));
-        }
     }
-    else if(tmp->key > key)                 //lavy podstrom
+    else if((*tree)->key > key)                 //lavy podstrom
     {
-        if(tmp->left != NULL)
+        if((*tree)->left != NULL)
         {
-            bst_delete(&tmp->left, key);
-            if(null == true)
-            {
-                tmp->left = NULL;
-                null = false;
-            }
-            else if(kidL == true)           //tmp->left mame mazat a ma laveho potomka
-            {
-                bst_node_t *delete = tmp->left;
-                tmp->left = tmp->left->left;
-                free(delete);
-                kidL = false;
-            }
-            else if(kidR == true)           //tmp->left mame mazat a ma praveho potomka
-            {
-                bst_node_t *delete = tmp->left;
-                tmp->left = tmp->left->right;
-                free(delete);
-                kidR = false;
-            }
+            bst_delete(&(*tree)->left, key);
+            return;
         }
         else
             return;
     }
-    else if(tmp->key < key)                 //pravy podstrom
+    else if((*tree)->key < key)                 //pravy podstrom
     {
-        if(tmp->right != NULL)
+        if((*tree)->right != NULL)
         {
-            bst_delete(&tmp->right, key);
-            if(null == false)
-            {
-                tmp->right = NULL;
-                null = false;
-            }
-            else if(kidL == true)           //tmp->right mame mazat a ma laveho potomka
-            {
-                bst_node_t *delete = tmp->right;
-                tmp->right = tmp->right->left;
-                free(delete);
-                kidL = false;
-            }
-            else if(kidR == true)           //tmp->right mame mazat a ma praveho potomka
-            {
-                bst_node_t *delete = tmp->right;
-                tmp->right = tmp->right->right;
-                free(delete);
-                kidL = false;
-            }
+            bst_delete(&(*tree)->right, key);
+            return;
         }
-        return;
+        else
+            return;
     }
 }
 
@@ -293,7 +257,13 @@ void bst_delete(bst_node_t **tree, char key) {
  * Funkciu implementujte rekurzívne bez použitia vlastných pomocných funkcií.
  */
 void bst_dispose(bst_node_t **tree) {
-
+    if(*tree != NULL)
+    {
+        bst_dispose(&(*tree)->left);
+        bst_dispose(&(*tree)->right);
+        free(*tree);
+        (*tree) = NULL;
+    }
 }
 
 /*
@@ -304,6 +274,12 @@ void bst_dispose(bst_node_t **tree) {
  * Funkciu implementujte rekurzívne bez použitia vlastných pomocných funkcií.
  */
 void bst_preorder(bst_node_t *tree) {
+    bst_node_t *tmp = tree;
+    if (tmp) {
+        bst_print_node(tmp);
+        bst_preorder(tmp->left);
+        bst_preorder(tmp->right);
+    }
 }
 
 /*
@@ -314,6 +290,13 @@ void bst_preorder(bst_node_t *tree) {
  * Funkciu implementujte rekurzívne bez použitia vlastných pomocných funkcií.
  */
 void bst_inorder(bst_node_t *tree) {
+    bst_node_t *tmp = tree;
+    if(tmp)
+    {
+        bst_inorder(tmp->left);
+        bst_print_node(tmp);
+        bst_inorder(tmp->right);
+    }
 }
 /*
  * Postorder prechod stromom.
@@ -323,4 +306,11 @@ void bst_inorder(bst_node_t *tree) {
  * Funkciu implementujte rekurzívne bez použitia vlastných pomocných funkcií.
  */
 void bst_postorder(bst_node_t *tree) {
+    bst_node_t *tmp = tree;
+    if(tmp)
+    {
+        bst_postorder(tmp->left);
+        bst_postorder(tmp->right);
+        bst_print_node(tmp);
+    }
 }
